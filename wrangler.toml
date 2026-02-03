@@ -1,0 +1,14 @@
+name = "posmin"
+main = "main.js"
+compatibility_date = "2026-02-03"
+preview_urls = false
+
+[[d1_databases]]
+binding = "pos_db"
+database_id = "2dc98682-f807-4ee0-8e99-da1a82535cbb"
+
+[observability]
+enabled = true
+
+[observability.logs]
+enabled = true
