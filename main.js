@@ -15,7 +15,7 @@ export default {
     }
     
     // Validar que DB está disponible
-    if (!env.DB) {
+    if (!env.pos_db) {
       return new Response(JSON.stringify({ error: 'Database not configured' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -25,7 +25,7 @@ export default {
     try {
       // GET /productos - Listar todos
       if (path === '/productos' && method === 'GET') {
-        const { results } = await env.DB.prepare('SELECT * FROM productos ORDER BY created_at DESC').all();
+        const { results } = await env.pos_db.prepare('SELECT * FROM productos ORDER BY created_at DESC').all();
         return new Response(JSON.stringify(results), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
@@ -34,7 +34,7 @@ export default {
       // GET /productos/:id - Obtener uno
       if (path.startsWith('/productos/') && method === 'GET') {
         const id = path.split('/')[2];
-        const result = await env.DB.prepare('SELECT * FROM productos WHERE id = ?').bind(id).first();
+        const result = await env.pos_db.prepare('SELECT * FROM productos WHERE id = ?').bind(id).first();
         if (!result) {
           return new Response(JSON.stringify({ error: 'Producto no encontrado' }), {
             status: 404,
@@ -55,7 +55,7 @@ export default {
           query += ' AND id != ?';
           params.push(excludeId);
         }
-        const result = await env.DB.prepare(query).bind(...params).first();
+        const result = await env.pos_db.prepare(query).bind(...params).first();
         return new Response(JSON.stringify({ exists: !!result }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
@@ -70,7 +70,7 @@ export default {
           query += ' AND id != ?';
           params.push(excludeId);
         }
-        const result = await env.DB.prepare(query).bind(...params).first();
+        const result = await env.pos_db.prepare(query).bind(...params).first();
         return new Response(JSON.stringify({ exists: !!result }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
@@ -94,7 +94,7 @@ export default {
           });
         }
         
-        const nombreExists = await env.DB.prepare('SELECT id FROM productos WHERE nombre = ?').bind(data.nombre).first();
+        const nombreExists = await env.pos_db.prepare('SELECT id FROM productos WHERE nombre = ?').bind(data.nombre).first();
         if (nombreExists) {
           return new Response(JSON.stringify({ error: 'El nombre ya existe' }), {
             status: 409,
@@ -102,7 +102,7 @@ export default {
           });
         }
         
-        const skuExists = await env.DB.prepare('SELECT id FROM productos WHERE codigo_interno_sku = ?').bind(data.codigo_interno_sku).first();
+        const skuExists = await env.pos_db.prepare('SELECT id FROM productos WHERE codigo_interno_sku = ?').bind(data.codigo_interno_sku).first();
         if (skuExists) {
           return new Response(JSON.stringify({ error: 'El SKU ya existe' }), {
             status: 409,
@@ -110,7 +110,7 @@ export default {
           });
         }
         
-        const result = await env.DB.prepare(
+        const result = await env.pos_db.prepare(
           'INSERT INTO productos (nombre, descripcion, codigo_interno_sku, stock_disponible, habilitar_stock, precio_unitario) VALUES (?, ?, ?, ?, ?, ?)'
         ).bind(
           data.nombre,
@@ -146,7 +146,7 @@ export default {
           });
         }
         
-        const nombreExists = await env.DB.prepare('SELECT id FROM productos WHERE nombre = ? AND id != ?').bind(data.nombre, id).first();
+        const nombreExists = await env.pos_db.prepare('SELECT id FROM productos WHERE nombre = ? AND id != ?').bind(data.nombre, id).first();
         if (nombreExists) {
           return new Response(JSON.stringify({ error: 'El nombre ya existe' }), {
             status: 409,
@@ -154,7 +154,7 @@ export default {
           });
         }
         
-        const skuExists = await env.DB.prepare('SELECT id FROM productos WHERE codigo_interno_sku = ? AND id != ?').bind(data.codigo_interno_sku, id).first();
+        const skuExists = await env.pos_db.prepare('SELECT id FROM productos WHERE codigo_interno_sku = ? AND id != ?').bind(data.codigo_interno_sku, id).first();
         if (skuExists) {
           return new Response(JSON.stringify({ error: 'El SKU ya existe' }), {
             status: 409,
@@ -162,7 +162,7 @@ export default {
           });
         }
         
-        await env.DB.prepare(
+        await env.pos_db.prepare(
           'UPDATE productos SET nombre = ?, descripcion = ?, codigo_interno_sku = ?, stock_disponible = ?, habilitar_stock = ?, precio_unitario = ? WHERE id = ?'
         ).bind(
           data.nombre,
@@ -182,7 +182,7 @@ export default {
       // DELETE /productos/:id - Eliminar
       if (path.startsWith('/productos/') && method === 'DELETE') {
         const id = path.split('/')[2];
-        await env.DB.prepare('DELETE FROM productos WHERE id = ?').bind(id).run();
+        await env.pos_db.prepare('DELETE FROM productos WHERE id = ?').bind(id).run();
         return new Response(JSON.stringify({ message: 'Producto eliminado' }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
