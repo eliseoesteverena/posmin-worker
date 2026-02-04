@@ -1,6 +1,6 @@
 name = "posmin"
 main = "main.js"
-compatibility_date = "2026-02-03"
+compatibility_date = "2026-02-04"
 preview_urls = false
 
 [[d1_databases]]
